@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import Logo from '../../public/Logo.svg'
+import Logo from '../../../public/Logo.svg'
 
 export function Header() {
   return (
