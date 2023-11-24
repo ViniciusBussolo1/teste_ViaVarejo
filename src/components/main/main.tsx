@@ -1,4 +1,57 @@
+'use client'
+
+import { useState } from 'react'
+
+interface ItemsTableProps {
+  select: string
+  name: string
+  valor: string
+  total: number
+}
+
 export function Main() {
+  const [select, setSelect] = useState('')
+  const [name, setName] = useState('')
+  const [valor, setValor] = useState('')
+  const [total, setTotal] = useState(0)
+
+  const [itemsTable, setItemsTable] = useState<Array<ItemsTableProps>>([])
+
+  const handleFormSubmit = () => {
+    event?.preventDefault()
+
+    if (select === 'compra') {
+      setTotal(total + parseFloat(valor))
+    } else {
+      setTotal((total) => total - parseFloat(valor))
+    }
+
+    setItemsTable([...itemsTable, { select, name, valor, total }])
+  }
+
+  const formatarValorMonetario = (valor: string) => {
+    const novoValor = parseFloat(valor)
+
+    const valorFormatado = novoValor.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    })
+
+    return valorFormatado
+  }
+
+  const formatarValorMonetarioTotal = () => {
+    const valor = total.toString()
+    const novoValor = parseFloat(valor)
+
+    const valorFormatado = novoValor.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    })
+
+    return valorFormatado
+  }
+
   return (
     <main className="w-full flex justify-center">
       <div className="max-w-[68.75rem] w-full pt-8 flex gap-5">
@@ -6,7 +59,10 @@ export function Main() {
           <h1 className="text-lg leading-[1.375rem] font-bold text-black">
             Nova transação
           </h1>
-          <form className="w-full flex flex-col justify-center items-center gap-5 mt-[1.313rem]">
+          <form
+            onSubmit={handleFormSubmit}
+            className="w-full flex flex-col justify-center items-center gap-5 mt-[1.313rem]"
+          >
             <div className="max-w-[23.125rem] w-full space-y-1">
               <label
                 htmlFor="transacao"
@@ -18,7 +74,10 @@ export function Main() {
                 name="transacao"
                 id="transacao"
                 className="w-full border-[0.063rem] border-gray-500 rounded py-2 px-[0.625rem] text-sm leading-[1.375rem] text-gray-600"
+                value={select}
+                onChange={(e) => setSelect(e.target.value)}
               >
+                <option value="">Selecione uma transação...</option>
                 <option value="compra">Compra</option>
                 <option value="venda">Venda</option>
               </select>
@@ -35,6 +94,8 @@ export function Main() {
                 id="name"
                 placeholder="Informe o nome da mercadoria"
                 className="w-full border-[0.063rem] border-gray-500 rounded py-2 px-[0.625rem] text-sm leading-[1.375rem] text-gray-600"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
             </div>
             <div className="max-w-[23.125rem] w-full space-y-1">
@@ -42,17 +103,22 @@ export function Main() {
                 htmlFor="valor"
                 className="text-sm leading-[1.375rem] text-gray-800"
               >
-                Nome da mercadoria
+                Valor
               </label>
               <input
                 type="number"
                 id="valor"
-                placeholder="R$ 0,00"
+                placeholder="Informe somente numeros"
                 className="w-full border-[0.063rem] border-gray-500 rounded py-2 px-[0.625rem] text-sm leading-[1.375rem] text-gray-600"
+                value={valor}
+                onChange={(e) => setValor(e.target.value)}
               />
             </div>
 
-            <button className="w-full bg-gray-800 rounded py-2 text-sm leading-[1.375rem] text-white">
+            <button
+              type="submit"
+              className="w-full bg-gray-800 rounded py-2 text-sm leading-[1.375rem] text-white"
+            >
               Adicionar transação
             </button>
           </form>
@@ -75,15 +141,21 @@ export function Main() {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-gray-500 ">
-                <td className="text-sm leading-[1rem] text-black">+</td>
-                <td className="text-sm leading-[1rem] text-black">
-                  Lorem ipsum dolor sit amet consectetur
-                </td>
-                <td className="text-end text-sm leading-[1.375rem] text-black">
-                  R$ 12.999,99
-                </td>
-              </tr>
+              {itemsTable.map((item, index) => {
+                return (
+                  <tr key={index} className="border-b border-gray-500">
+                    <td className="text-sm leading-[1rem] text-black">
+                      {item.select === 'compra' ? '+' : '-'}
+                    </td>
+                    <td className="text-sm leading-[1rem] text-black">
+                      {item.name}
+                    </td>
+                    <td className="text-end text-sm leading-[1.375rem] text-black">
+                      {formatarValorMonetario(item.valor)}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
             <tfoot>
               <tr className="border-t border-gray-500">
@@ -94,10 +166,10 @@ export function Main() {
                 <th className="text-end">
                   <div className="flex flex-col">
                     <span className="text-sm leading-[1.375rem] text-black font-bold">
-                      R$ 12.909,99
+                      {formatarValorMonetarioTotal()}
                     </span>
                     <span className="text-[0.625rem] leading-[1.375rem] text-black">
-                      [LUCRO]
+                      {total < 0 ? '[PREJUIZO]' : '[LUCRO]'}
                     </span>
                   </div>
                 </th>
