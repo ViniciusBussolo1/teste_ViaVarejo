@@ -1,10 +1,11 @@
 import { Form } from './Form'
 import { describe } from 'node:test'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import '@testing-library/jest-dom'
 
+const handleFormSubmit = jest.fn()
 describe('Test Form', () => {
   it('deve rendelizar o form corretamente', () => {
     render(
@@ -24,8 +25,11 @@ describe('Test Form', () => {
     expect(screen.getByLabelText(/valor/i)).toBeInTheDocument()
   })
 
-  it.only('deve fazer o submit do form corretamente', async () => {
-    const handleFormSubmit = jest.fn()
+  it('deve fazer o submit do form corretamente', async () => {
+    handleFormSubmit.mockImplementation((event) => {
+      event.preventDefault()
+    })
+
     render(
       <Form
         handleFormSubmit={handleFormSubmit}
@@ -63,14 +67,12 @@ describe('Test Form', () => {
       fakeDados.valor,
     )
 
-    userEvent.click(
+    fireEvent.submit(
       screen.getByRole('button', {
         name: /adicionar transação/i,
       }),
     )
 
-    await waitFor(() => {
-      expect(handleFormSubmit).toHaveBeenCalled()
-    })
+    expect(handleFormSubmit).toHaveBeenCalledTimes(1)
   })
 })
