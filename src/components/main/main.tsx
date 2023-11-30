@@ -62,7 +62,6 @@ export function Main() {
           </h1>
           <Form
             handleFormSubmit={handleFormSubmit}
-            loading={false}
             name={name}
             select={select}
             valor={valor}
